@@ -1,0 +1,57 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[Dates]]
+deps = ["Printf"]
+uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[JSON]]
+deps = ["Dates", "Mmap", "Parsers", "Unicode"]
+git-tree-sha1 = "81690084b6198a2e1da36fcfda16eeca9f9f24e4"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "0.21.1"
+
+[[Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[Mmap]]
+uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[NBInclude]]
+deps = ["JSON", "SoftGlobalScope"]
+git-tree-sha1 = "32bb996dc3f767b69fe9241033858b3f974741ec"
+uuid = "0db19996-df87-5ea3-a455-e3a50d440464"
+version = "2.2.0"
+
+[[Parsers]]
+deps = ["Dates"]
+git-tree-sha1 = "50c9a9ed8c714945e01cd53a21007ed3865ed714"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "1.0.15"
+
+[[Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[REPL]]
+deps = ["InteractiveUtils", "Markdown", "Sockets"]
+uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+
+[[Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[SoftGlobalScope]]
+deps = ["REPL"]
+git-tree-sha1 = "986ec2b6162ccb95de5892ed17832f95badf770c"
+uuid = "b85f4697-e234-5449-a836-ec8e2f98b302"
+version = "1.1.0"
+
+[[Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
