@@ -10,9 +10,8 @@ function studentinfo()
     return info
 end
 
-notebook() = @nbinclude(joinpath(@__DIR__,"hw1_NewtonsMethod.ipynb"))
-function test_benchmarktools()
-    @btime 1+2 samples=2 evals=2
+function notebook() 
+    @nbinclude(joinpath(@__DIR__,"hw1.ipynb"))
 end
 
 end # module
