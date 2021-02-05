@@ -4,4 +4,8 @@ authors = ["Brian <bjack205@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+MeshCat = "283c5d60-a78f-5afe-a0af-af636b173e11"
+MeshCatMechanisms = "6ad125db-dd91-5488-b820-c1df6aab299d"
 NBInclude = "0db19996-df87-5ea3-a455-e3a50d440464"
+RigidBodyDynamics = "366cf18f-59d5-5db9-a4de-86a9f6786172"
