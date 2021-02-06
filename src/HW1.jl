@@ -1,6 +1,7 @@
 module HW1
 
 using NBInclude
+include("utils.jl")
 
 function studentinfo()
     info = Dict(
@@ -11,7 +12,8 @@ function studentinfo()
 end
 
 function notebook() 
-    @nbinclude(joinpath(@__DIR__,"hw1.ipynb"))
+    @nbinclude(joinpath(@__DIR__,"Q1.ipynb"))
+    @nbinclude(joinpath(@__DIR__,"Q2.ipynb"))
 end
 
 end # module
