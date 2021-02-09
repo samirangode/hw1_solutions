@@ -9,14 +9,12 @@ In this homework we'll be exploring topics in dynamics and optimization. Here's 
 ## Getting Started
 All the homeworks are distributed as Jupyter notebooks. Follow these instructions to get everything set up.
 
-1. Clone this repo onto your computer.
 1. Install Julia. Download v1.5.3 from the [Julia website](https://julialang.org/downloads/). Extract the binaries onto a stable location on your computer, and add the `/bin` folder to your system path.
-2. Install [Jupyter](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html)
+2. Clone this repo, and open a terminal in the root directory
 2. Start a Julia REPL in your terminal using `julia`. This should work as long as the binaries are on your system path.
 3. Install the [IJulia](https://github.com/JuliaLang/IJulia.jl) using the Julia package manager. In the REPL, enter the package manager using `]`, then enter `add IJulia` to add it to your system path.
-4. In a terminal, move to the directory where you cloned this repository
-5. In the terminal, start up a Jupyter notebook / lab using `jupyter notebook` / `jupyter lab`
-6. In Jupyter, you should now have access to the Julia v1.5.3 kernel. Load one of the notebooks in the `/src` folder and get started!
+4. In the REPL (hit backspace to exit the package manager), enter `using IJulia`
+5. Launch the notebook using `notebook()` or `jupyterlab()`
 
 ## Running the Autograder
 The autograder will run automatically whenever you push to GitHub. You can check the status of your autograding results in the `Actions` tab on GitHub, or see if your tests are passing by checking the badge at the top of this README.
