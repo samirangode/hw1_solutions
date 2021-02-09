@@ -1,5 +1,5 @@
 # Optimal Control 16-745 HW1: Due Thursday, February 18
-![CI](https://github.com/Optimal-Control-16-745/HW1/workflows/CI/badge.svg)
+![CI](https://github.com/Optimal-Control-16-745/HW1_solution/workflows/CI/badge.svg)
 
 In this homework we'll be exploring topics in dynamics and optimization. Here's an overview of the problems:
 1. Implement an implicit integrator and compare performance against an explicit method
