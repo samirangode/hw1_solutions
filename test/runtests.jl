@@ -10,5 +10,7 @@ using StaticArrays
 
 HW1.notebook()
 
+##
 include("q1.jl")
 include("q2.jl")
+include("q3.jl")
