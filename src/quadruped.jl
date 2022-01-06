@@ -8,77 +8,6 @@ using LinearAlgebra
 using ForwardDiff
 
 const URDFPATH = joinpath(@__DIR__, "..","a1","urdf","a1.urdf")
-const STATEMAP = (
-    foot_joint_x = (1,1),
-    foot_joint_y = (2,2),
-    foot_joint_z = (3,3),
-    FR_hip_joint = (4,7),
-    FL_hip_joint = (5,8),
-    RR_hip_joint = (6,6),
-    RL_hip_joint = (7,9),
-    FR_thigh_joint = (8,10),
-    FL_thigh_joint = (9,11),
-    RR_thigh_joint = (10,5),
-    RL_thigh_joint = (11,12),
-    FR_calf_joint = (12,13),
-    FL_calf_joint = (13,14),
-    RR_calf_joint = (14,4),
-    RL_calf_joint = (15,15)
-)
-function state2mech(x)
-    SA[
-        x[STATEMAP[:foot_joint_x][1]],
-        x[STATEMAP[:foot_joint_y][1]],
-        x[STATEMAP[:foot_joint_y][1]],
-        x[STATEMAP[:RR_calf_joint][1]],
-        x[STATEMAP[:RR_thigh_joint][1]],
-        x[STATEMAP[:RR_hip_joint][1]],
-        x[STATEMAP[:FR_hip_joint][1]],
-        x[STATEMAP[:FL_hip_joint][1]],
-        x[STATEMAP[:RL_hip_joint][1]],
-        x[STATEMAP[:FR_thigh_joint][1]],
-        x[STATEMAP[:FL_thigh_joint][1]],
-        x[STATEMAP[:RL_thigh_joint][1]],
-        x[STATEMAP[:FR_calf_joint][1]],
-        x[STATEMAP[:FL_calf_joint][1]],
-        x[STATEMAP[:RL_calf_joint][1]],
-    ]
-end
-
-
-function mech2state(q)
-    SA[
-        q[STATEMAP[:foot_joint_x][2]],
-        q[STATEMAP[:foot_joint_y][2]],
-        q[STATEMAP[:foot_joint_z][2]],
-        q[STATEMAP[:FR_hip_joint][2]],
-        q[STATEMAP[:FL_hip_joint][2]],
-        q[STATEMAP[:RR_hip_joint][2]],
-        q[STATEMAP[:RL_hip_joint][2]],
-        q[STATEMAP[:FR_thigh_joint][2]],
-        q[STATEMAP[:FL_thigh_joint][2]],
-        q[STATEMAP[:RR_thigh_joint][2]],
-        q[STATEMAP[:RL_thigh_joint][2]],
-        q[STATEMAP[:FR_calf_joint][2]],
-        q[STATEMAP[:FL_calf_joint][2]],
-        q[STATEMAP[:RR_calf_joint][2]],
-        q[STATEMAP[:RL_calf_joint][2]],
-    ]
-end
-
-function controls2torques(u)
-    τ = [SA[0,0,0]; u]
-    state2mech(τ)
-end
-
-function torques2controls(τ)
-    u = mech2state(τ) 
-    return u[SVector{12}(4:15)]
-end
-
-function mechstate2fullstate(state::MechanismState)
-    return [mech2state(configuration(state)); mech2state(velocity(state))]
-end
 
 function attach_foot!(mech::Mechanism{T}, foot="RR"; revolute::Bool=true) where T
     # Get the relevant bodies from the model
@@ -170,7 +99,6 @@ end
 function build_quadruped()
     a1 = parse_urdf(URDFPATH, floating=true, remove_fixed_tree_joints=false) 
     attach_foot!(a1)
-    # build_rear_foot_constraints_revolute!(a1)
     return a1
 end
 
@@ -204,16 +132,9 @@ function dynamics(model::UnitreeA1, x::AbstractVector{T1}, u::AbstractVector{T2}
     res = model.dyncache[T]
 
     # Convert from state ordering to the ordering of the mechanism
-    # q = state2mech(x[SVector{15}(1:15)]) 
-    # v = state2mech(x[SVector{15}(16:30)])
     copyto!(state, x)
-    # τ = controls2torques(u)
     τ = [zeros(3); u]
-    # set_configuration!(state, q)
-    # set_velocity!(state, v)
     dynamics!(res, state, τ)
-    # q̇ = mech2state(res.q̇)
-    # v̇ = mech2state(res.v̇)
     q̇ = res.q̇
     v̇ = res.v̇
     return [q̇; v̇]
@@ -225,14 +146,6 @@ function jacobian(model::UnitreeA1, x, u)
     faug(z) = dynamics(model, z[ix], z[iu])
     z = [x; u]
     ForwardDiff.jacobian(faug, z)
-end
-
-function rk4(model::UnitreeA1, x, u, dt)
-	k1 = dynamics(model, x,        u)*dt
-	k2 = dynamics(model, x + k1/2, u)*dt
-	k3 = dynamics(model, x + k2/2, u)*dt
-	k4 = dynamics(model, x + k3,   u)*dt
-	x + (k1 + 2k2 + 2k3 + k4)/6
 end
 
 # Set initial guess
@@ -262,12 +175,3 @@ function initialize_visualizer(a1::UnitreeA1)
     cd(@__DIR__)
     return mvis
 end
-
-# times = range(0,1, step=0.01)
-# X = [zero(x) for t in times]
-# X[1] .= x
-# for i = 1:length(times)-1
-#     X[i+1] = rk4(model, X[i], u, times[i+1]-times[i])
-# end
-# qs = [state2mech(x[1:15]) for x in X]
-# animate(mvis, Vector(times), Vector.(qs))

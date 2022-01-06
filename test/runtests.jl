@@ -1,16 +1,11 @@
-using HW1
-using Test
-using LinearAlgebra
-using Statistics
-using JLD2
-using FileIO
-using RobotZoo
-using RobotDynamics
-using StaticArrays
+include("autograder.jl")
 
-HW1.notebook()
+autograder = true
+gradequestion("Q1")
+gradequestion("Q2")
+gradequestion("Q3")
 
-##
-include("q1.jl")
-include("q2.jl")
-include("q3.jl")
+solutiondir = joinpath(@__DIR__, "..")  # This will change when grading
+checktestsets("Q1", solutiondir) 
+checktestsets("Q2", solutiondir) 
+checktestsets("Q3", solutiondir) 
