@@ -101,7 +101,7 @@ function printresult(ts::CustomTestSet; width=getdescriptionwidth(ts))
     fspec2 = "{:<5d}"
     fspec3 = "{:<5}"
     if ts.depth == 0
-        println(BOLD, format(fspec1,"\nTest Summary:"), " | ", CYAN_FG(format(fspec3,"Score")), " ", BLUE_FG(format(fspec3, "Total")))
+        println(BOLD, format(fspec1,"\nTest Summary:"), "  | ", CYAN_FG(format(fspec3,"Score")), " ", BLUE_FG(format(fspec3, "Total")))
     end
     fail = round(Int,ts.points_missed)
     total = round(Int,ts.points_total)
