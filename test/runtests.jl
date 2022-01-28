@@ -1,11 +1,22 @@
+
+
+const NUMQUESTIONS = 3
+
+# Create a module for each question
+for i in 1:NUMQUESTIONS 
+@eval module $(Symbol("Q" * string(i)))
 include("autograder.jl")
+getname() = string(split(string(@__MODULE__), ".")[end])
+grade() = Autograder.gradequestion(getname()) 
+checktestsets(solutiondir=joinpath(@__DIR__, "..")) = Autograder.checktestsets(getname(), solutiondir)
+end
+end
 
-autograder = true
-gradequestion("Q1")
-gradequestion("Q2")
-gradequestion("Q3")
+solutiondir = get(ARGS, 1, joinpath(@__DIR__, ".."))
 
-solutiondir = joinpath(@__DIR__, "..")  # This will change when grading
-checktestsets("Q1", solutiondir) 
-checktestsets("Q2", solutiondir) 
-checktestsets("Q3", solutiondir) 
+# Grade all of the questions
+modules = [@eval $(Symbol("Q" * string(i))) for i = 1:NUMQUESTIONS]
+results = map(modules) do mod
+    mod.checktestsets(solutiondir)
+    mod.grade()[1]
+end

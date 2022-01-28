@@ -1,3 +1,4 @@
+module Autograder
 using NBInclude
 using Test
 using Formatting
@@ -5,16 +6,18 @@ using Crayons
 using Crayons.Box
 
 const INDENT_SIZE = 2
+const autograder = true
 
 import Test: Test, record, finish
 using Test: AbstractTestSet, Result, Pass, Fail, Error
 using Test: get_testset_depth, get_testset
+
 mutable struct CustomTestSet <: Test.AbstractTestSet
     description::AbstractString
     foo::Int
     results::Vector
     points_total::Float64
-    points_passed::Float64
+    points_missed::Float64
     depth::Int
     # constructor takes a description string and options keyword arguments
     CustomTestSet(desc; foo=1) = new(desc, foo, [], 0, 0, 0)
@@ -23,13 +26,22 @@ end
 record(ts::CustomTestSet, child::AbstractTestSet) = push!(ts.results, child)
 record(ts::CustomTestSet, res::Result) = push!(ts.results, res)
 function record(ts::CustomTestSet, res::Pass) 
-    points = getpoints(res.source); 
-    ts.points_passed += points; 
-    ts.points_total += points; 
+    # points,total = getpoints(res.source); 
+    # ts.points_passed += points; 
+    # ts.points_total += points; 
     push!(ts.results, res)
 end
-record(ts::CustomTestSet, res::Fail) = begin ts.points_total += getpoints(res.source); push!(ts.results, res) end
-record(ts::CustomTestSet, res::Error) = begin ts.points_total += getpoints(res.source); push!(ts.results, res) end
+function record(ts::CustomTestSet, res::Fail)
+    points = getpoints(res.source); 
+    ts.points_missed += points
+    println("Test failed $(ts.description)")
+    display(res)
+end
+function record(ts::CustomTestSet, res::Error)
+    points = getpoints(res.source); 
+    ts.points_missed += points
+    display(res)
+end
 function finish(ts::CustomTestSet)
     # just record if we're not the top-level parent
     depth = get_testset_depth()
@@ -39,6 +51,7 @@ function finish(ts::CustomTestSet)
         return ts
     end
     calcscore!(ts)
+
     ts
 end
 
@@ -46,8 +59,8 @@ function calcscore!(ts::CustomTestSet)
     for r in ts.results
         if r isa CustomTestSet
             calcscore!(r)
-            ts.points_total += r.points_total
-            ts.points_passed += r.points_passed
+            # ts.points_total += r.points_total
+            ts.points_missed += r.points_missed
         end
     end
 end
@@ -88,10 +101,11 @@ function printresult(ts::CustomTestSet; width=getdescriptionwidth(ts))
     fspec2 = "{:<5d}"
     fspec3 = "{:<5}"
     if ts.depth == 0
-        println(BOLD, format(fspec1,"Test Summary:"), " | ", CYAN_FG(format(fspec3,"Score")), " ", BLUE_FG(format(fspec3, "Total")))
+        println(BOLD, format(fspec1,"\nTest Summary:"), " | ", CYAN_FG(format(fspec3,"Score")), " ", BLUE_FG(format(fspec3, "Total")))
     end
-    pass = round(Int,ts.points_passed)
+    fail = round(Int,ts.points_missed)
     total = round(Int,ts.points_total)
+    pass = total - fail 
     color = getscorecolor(pass, total) 
     println(crayon"!bold", format(fspec1, indent * ts.description), BOLD, " | ", color(format(fspec2,pass)), " ", BLUE_FG(format(fspec2, total)))
     # println(format(fspec, indent * ts.description, ts.points_passed, ts.points_total))
@@ -128,13 +142,27 @@ function getpoints(s::String)
     idx = findfirst(r"POINTS = ", s)
     if !isnothing(idx)
         textafter = split(s[idx[end]+1:end])
-        if length(textafter) > 0
+        if length(textafter) > 0 
             return parse(Float32, textafter[1])
         end
     end
-    return 0 
+    return 0.0f0
 end
 getpoints(src::LineNumberNode) = getpoints(getsourceline(src))
+
+function gettotalpoints(ts::CustomTestSet, testtext)
+    d = ts.description
+    lines = filter(testtext) do line
+        occursin(d, line)
+    end
+    if !isempty(lines)
+        ts.points_total = getpoints(lines[1])
+    end
+    for res in ts.results
+        gettotalpoints(res, testtext)
+    end
+end
+gettotalpoints(any, testtext) = nothing
 
 function getnotebookfile(notebookname::String; repodir=joinpath(@__DIR__, ".."))
     name,ext = splitext(notebookname)
@@ -160,17 +188,40 @@ function gradequestion(notebookname::String; verbose=true)
     outfile = joinpath(dirname(nbfile), "$(name)_tmp.jl")
     nbexport(outfile, nbfile)
 
+    # Log files
+    logfile = joinpath(@__DIR__, notebookname * ".log")
+    logio = open(logfile, "w")
+
     # Run the file in the custom test set
     ts = @testset CustomTestSet "$name" begin
-        include(outfile)
+        redirect_stdout(logio) do
+            redirect_stderr(logio) do
+                include(outfile)
+            end
+        end
     end
+    close(logio)
     rm(outfile)  # Delete source file
+
+    # Generate a file with just the tests
+    testfile = joinpath(dirname(nbfile), "$(name)_testsets.jl")
+    nbexport(testfile, nbfile, regex=r"\s*@testset*", markdown=false)
+    testtext = readlines(testfile)
+    rm(testfile)
+
+    # Add up all the points for the problem
+    gettotalpoints(ts, testtext)
+    for res in ts.results
+        if res isa CustomTestSet
+            ts.points_total += res.points_total
+        end
+    end
 
     # Print results
     if verbose
         printresult(ts)
     end
-    return (ts.points_passed, ts.points_total), ts
+    return (ts.points_total - ts.points_missed, ts.points_total), ts
 end
 
 """
@@ -194,4 +245,6 @@ function checktestsets(notebookname::String, solutiondir::String)
     if (solcontents != nbcontents)
         @warn "Student's testsets do not match the solution test sets for $name. They may have been tampered with."
     end
+end
+
 end
